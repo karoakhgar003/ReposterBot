@@ -356,7 +356,7 @@ def error(update, context):
 
 # Run the program1
 if __name__ == '__main__':
-    updater = Updater("6239735036:AAFrY2SmPsCrj389r1qYL2REvQIpSUC_dYc")
+    updater = Updater("YOUR BOT TOKEN")
     dp = updater.dispatcher
     # Commands
     dp.add_handler(CommandHandler('start', start_command))
