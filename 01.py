@@ -46,7 +46,6 @@ def add_admin_command(update,context):
             else:
                 update.message.reply_text('User is  already in the admins list')       
     
-
 # Lets us use the /start command
 def start_command(update, context):
     if is_admin(update.message.chat.username):
@@ -74,7 +73,6 @@ def show_channels_command(update, context):
             Channels_list_str += Channels_list[i]["username"] + "\n\n\t\t\tID:" + str(Channels_list[i]["id"])+ "\n\n\t\t\tPostInterval: " + str(Channels_list[i]["Interval"]) + " Seconds\n\n\t\t\tPost Delay: " + str(Channels_list[i]["Repost_delay"]) + "Minutes\n\n\n"
         update.message.reply_text(f"You have added {len(Channels_list)} channels \n Your Channels list:\n {Channels_list_str}")
         update.message.reply_text("Channel Commands:\n Add a Channel:\n\t\t To do so you can use the (/add_channel USERNAME) command.For example:\n\t\t /add_channel @fallen_shop\n\n Edit Interval:\n\t\t To edit a channels interval you can use the (edit_interval USERNAME VALUE.For example:\n /edit_interval @fallen_shop 15\n\n Edit Repost Delay:\n To edit a channels repost delay you can use the (/edit_repost_delay USERNAME VALUE).For example:\n /edit_repost_delay @fallen_shop 5\tRrmove All Channels:\nTo remove all of the cahnnels use the command (/remove_all_channels)")
-    
 
 def add_channels_command(update, context) -> str:
     if is_admin(update.message.chat.username):
@@ -175,54 +173,100 @@ def edit_agent_bot_token_command(update, context):
             print("No token provided")  
 
 async def send_message(channel,update):
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-    bot_token = config['Setting']['agent_bot_token']
-    bot = Bot(token=bot_token)
-    username = channel["username"]
-    Interval = channel["Interval"]
-    Repost_delay = channel["Repost_delay"]
-    f = open('posts.json')
-    data = json.load(f)
-    for j in range(999999):
+    try:
+        config = configparser.ConfigParser()
         config.read("config.ini")
-        Bot_Status = config['Setting']['bot_status']
-        if Bot_Status == "True":
-            for i in range(0, len(data)):
-                config = configparser.ConfigParser()
-                config.read("config.ini")
-                Bot_Status = config['Setting']['bot_status']
-                if Bot_Status != "True":
-                    print("Bot has been disabled")
-                    break
-                if data[i]["message_id"][username] != '':
-                    bot.delete_message(chat_id=username, message_id=data[i]["message_id"][username])
-                message = bot.send_message(chat_id=username, text="#" + data[i]["fid"] + "\n" + data[i]["message"])
-                with open('posts.json') as file:
-                    data = json.load(file)
-                    data[i]["message_id"][username] = str(message.message_id)
-                with open('posts.json', 'w') as file:
-                    file.write(json.dumps(data))
+        bot_token = config['Setting']['agent_bot_token']
+        bot = Bot(token=bot_token)
+        username = channel["username"]
+        Interval = channel["Interval"]
+        Repost_delay = channel["Repost_delay"]
+        f = open('posts.json')
+        data = json.load(f)
+        for j in range(999999):
+            config.read("config.ini")
+            Bot_Status = config['Setting']['bot_status']
+            if Bot_Status == "True":
+                for i in range(0, len(data)):
+                    config = configparser.ConfigParser()
+                    config.read("config.ini")
+                    Bot_Status = config['Setting']['bot_status']
+                    if Bot_Status != "True":
+                        print("Bot has been disabled")
+                        break
+                    if data[i]["message_id"][username] != '':
+                        bot.delete_message(chat_id=username, message_id=data[i]["message_id"][username])
+                    message = bot.send_message(chat_id=username, text="#" + data[i]["fid"] + "\n" + data[i]["message"])
+                    with open('posts.json') as file:
+                        data = json.load(file)
+                        data[i]["message_id"][username] = str(message.message_id)
+                    with open('posts.json', 'w') as file:
+                        file.write(json.dumps(data))
 
-                await asyncio.sleep(int(Interval))   
-            await asyncio.sleep(60*int(Repost_delay))     
-        else:
-            update.message.reply_text('Bot Disabled')
-            break
+                    await asyncio.sleep(int(Interval))   
+                await asyncio.sleep(60*int(Repost_delay))     
+            else:
+                update.message.reply_text('Bot Disabled')
+                break
+    except:
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        bot_token = config['Setting']['agent_bot_token']
+        bot = Bot(token=bot_token)
+        username = channel["username"]
+        Interval = channel["Interval"]
+        Repost_delay = channel["Repost_delay"]
+        f = open('posts.json')
+        data = json.load(f)
+        for j in range(999999):
+            config.read("config.ini")
+            Bot_Status = config['Setting']['bot_status']
+            if Bot_Status == "True":
+                for i in range(0, len(data)):
+                    config = configparser.ConfigParser()
+                    config.read("config.ini")
+                    Bot_Status = config['Setting']['bot_status']
+                    if Bot_Status != "True":
+                        print("Bot has been disabled")
+                        break
+                    if data[i]["message_id"][username] != '':
+                        bot.delete_message(chat_id=username, message_id=data[i]["message_id"][username])
+                    message = bot.send_message(chat_id=username, text="#" + data[i]["fid"] + "\n" + data[i]["message"])
+                    with open('posts.json') as file:
+                        data = json.load(file)
+                        data[i]["message_id"][username] = str(message.message_id)
+                    with open('posts.json', 'w') as file:
+                        file.write(json.dumps(data))
+
+                    await asyncio.sleep(int(Interval))   
+                await asyncio.sleep(60*int(Repost_delay))     
+            else:
+                update.message.reply_text('Bot Disabled')
+                break        
            
 async def send_messages_to_channels(channels,update):
-    tasks = []
-    for channel in channels:
-        task = asyncio.create_task(send_message(channel,update))
-        tasks.append(task)
-        await asyncio.sleep(int(channel["Repost_delay"]))
-    await asyncio.gather(*tasks)
-
+    try:
+        tasks = []
+        for channel in channels:
+            task = asyncio.create_task(send_message(channel,update))
+            tasks.append(task)
+            await asyncio.sleep(int(channel["Repost_delay"]))
+        await asyncio.gather(*tasks)
+    except:
+        tasks = []
+        for channel in channels:
+            task = asyncio.create_task(send_message(channel,update))
+            tasks.append(task)
+            await asyncio.sleep(int(channel["Repost_delay"]))
+        await asyncio.gather(*tasks)        
 
     await asyncio.gather(*tasks)
 
 async def main(data,update):   
-    await send_messages_to_channels(data,update)
+    try:
+        await send_messages_to_channels(data,update)
+    except:
+         await send_messages_to_channels(data,update)   
 
 def start_reposting_command(update, context):
     if is_admin(update.message.chat.username):
@@ -233,7 +277,10 @@ def start_reposting_command(update, context):
         channels_list = json.load(f)
         if Bot_Status == "True":
             update.message.reply_text('Reposting Started!')
-            asyncio.run(main(channels_list,update)) 
+            try:
+                asyncio.run(main(channels_list,update)) 
+            except:
+                asyncio.run(main(channels_list,update))   
         else:
             update.message.reply_text('Bot Disabled')
                 
@@ -298,7 +345,7 @@ def handle_message(update, context: CallbackContext):
         # Get basic info of the incoming message
         if is_admin(update.message.chat.username):
             message_type = update.message.chat.type
-            text = str(update.message.text).lower()
+            text = str(update.message.text)
             response = ''
             with  open('karo.txt', 'w', encoding='utf-8') as file:
                 file.write(text)
@@ -313,6 +360,32 @@ def handle_message(update, context: CallbackContext):
                     handle_response(new_text)
             else:
                 handle_response(update,text)
+
+def show_posts_command(update,context):
+    if is_admin(update.message.chat.username):
+        f = open('posts.json')
+        posts = json.load(f)
+        posts_string = ''
+        for i in range(len(posts)):
+            posts_string += "#" + posts[i]['fid'] + "\n\n" + posts[i]["message"] + '\n➖➖➖➖➖' + "\n\n"
+        update.message.reply_text(posts_string)
+        update.message.reply_text('To remove a post use this command:\n`/remove_post ID` for example:\n`/remove_post \#123456`\n\n To remove all postss use this command:\n `/remove_all_posts`', parse_mode='MarkdownV2')
+
+def remove_posts_commad(update,context):
+    if is_admin(update.message.chat.username):
+        args = context.args
+        if args:
+            posts_id = args[0].split('#')[-1]
+            f = open('posts.json')
+            posts = json.load(f)
+            for i in range(len(posts)):
+                if posts_id == posts[i]['fid']:
+                    posts.pop(i)
+                    update.message.reply_text('Posts deleted successfully')
+                    break    
+            with open('posts.json', 'w') as file:
+                file.write(json.dumps(posts) + '\n')      
+
 
 def edit_interval_command(update , context):
     if is_admin(update.message.chat.username):
@@ -356,11 +429,12 @@ def error(update, context):
 
 # Run the program1
 if __name__ == '__main__':
-    updater = Updater("YOUR BOT TOKEN")
+    updater = Updater("YUR BOT TOKEN")
     dp = updater.dispatcher
     # Commands
     dp.add_handler(CommandHandler('start', start_command))
     dp.add_handler(CommandHandler('start_rp', start_reposting_command,run_async=True))
+    dp.add_handler(CommandHandler('show_posts', show_posts_command))
     dp.add_handler(CommandHandler('change_status', change_status_command))
     dp.add_handler(CommandHandler('setting', show_setting_command))
     dp.add_handler(CommandHandler('edit_postkeyword', edit_post_keyword_command))
@@ -374,6 +448,7 @@ if __name__ == '__main__':
     dp.add_handler(CommandHandler('remove_all_posts', remove_all_posts_command))
     dp.add_handler(CommandHandler('remove_all_channels', remove_all_channels_command))
     dp.add_handler(CommandHandler('statistics', show_statics_command))
+    dp.add_handler(CommandHandler('remove_post', remove_posts_commad))
 
     # Messages
     dp.add_handler(MessageHandler(Filters.text & (~Filters.command), handle_message))
