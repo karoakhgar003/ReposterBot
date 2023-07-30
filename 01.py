@@ -49,7 +49,7 @@ def add_admin_command(update,context):
 # Lets us use the /start command
 def start_command(update, context):
     if is_admin(update.message.chat.username):
-        update.message.reply_text('/start\n Shows this message again\n➖➖➖➖➖\n/setting\nShows your current setting\n➖➖➖➖➖\n/channels\nShows list of your channels\n➖➖➖➖➖\n/admins\nList of your admins\n➖➖➖➖➖\n/statistics\nShows a summary about your posts\n➖➖➖➖➖')
+        update.message.reply_text('/start\n Shows this message again\n➖➖➖➖➖\n/setting\nShows your current setting\n➖➖➖➖➖\n/channels\nShows list of your channels\n➖➖➖➖➖\n/admins\nList of your admins\n➖➖➖➖➖\n/statistics\nShows a summary about your posts\n➖➖➖➖➖\n/show_posts\nShows the posts that has been saved\n➖➖➖➖➖\n/start_rp\nStart Reposting')
 
 def show_setting_command(update, context):
     if is_admin(update.message.chat.username):
@@ -62,7 +62,7 @@ def show_setting_command(update, context):
             Bot_Status = "Enabled"
         elif Bot_status == "False":
             Bot_Status = "Disabled"    
-        update.message.reply_text(f"Bot status: {Bot_status}\n✏️To Edit bot status, use this command:\n/change_status NEW_VALUE(0 or 1)\n For Example: \n   /change_status 1\n➖➖➖➖➖\npostKeyword = {Post_keyword}\n✏️To Edit post keyword, use this command:\n/edit_postkeyword NEW_VALUE\n For Example: \n   /edit_postkeyword playstaion\n➖➖➖➖➖\nAgent bot token: {Agent_token}\n✏️To Edit agent bot token, use this command:\n/edit_agentbottoken NEW_VALUE\n For Example: \n   /edit_agentbottoken ABADSADNAJSDN12491248FASF")
+        update.message.reply_text(f"Bot status: {Bot_status}\n✏️To Edit bot status, use this command:\n`/change_status NEW_VALUE`\(0 or 1\)\n For Example: \n   `/change_status 1`\n➖➖➖➖➖\npostKeyword \= {Post_keyword}\n✏️To Edit post keyword, use this command:\n`/edit_postkeyword NEW_VALUE`\n For Example: \n   `/edit_postkeyword playstaion`\n➖➖➖➖➖\nAgent bot token: {Agent_token}\n✏️To Edit agent bot token, use this command:\n`/edit_agentbottoken NEW_VALUE`\n For Example: \n   `/edit_agentbottoken ABADSADNAJSDN12491248FASF`", parse_mode='MarkdownV2')
 
 def show_channels_command(update, context):
     if is_admin(update.message.chat.username):
@@ -72,7 +72,7 @@ def show_channels_command(update, context):
         for i in range(len(Channels_list)):
             Channels_list_str += Channels_list[i]["username"] + "\n\n\t\t\tID:" + str(Channels_list[i]["id"])+ "\n\n\t\t\tPostInterval: " + str(Channels_list[i]["Interval"]) + " Seconds\n\n\t\t\tPost Delay: " + str(Channels_list[i]["Repost_delay"]) + "Minutes\n\n\n"
         update.message.reply_text(f"You have added {len(Channels_list)} channels \n Your Channels list:\n {Channels_list_str}")
-        update.message.reply_text("Channel Commands:\n Add a Channel:\n\t\t To do so you can use the (/add_channel USERNAME) command.For example:\n\t\t /add_channel @fallen_shop\n\n Edit Interval:\n\t\t To edit a channels interval you can use the (edit_interval USERNAME VALUE.For example:\n /edit_interval @fallen_shop 15\n\n Edit Repost Delay:\n To edit a channels repost delay you can use the (/edit_repost_delay USERNAME VALUE).For example:\n /edit_repost_delay @fallen_shop 5\tRrmove All Channels:\nTo remove all of the cahnnels use the command (/remove_all_channels)")
+        update.message.reply_text("Channel Commands:\n Add a Channel:\n\t\t To do so you can use the \(`/add_channel USERNAME`\) command\.For example:\n\t\t `/add_channel @fallen_shop`\n\n Edit Interval:\n\t\t To edit a channels interval you can use the \(`edit_interval USERNAME VALUE`\)\.For example:\n `/edit_interval @fallen_shop 15`\n\n Edit Repost Delay:\n To edit a channels repost delay you can use the \(`/edit_repost_delay USERNAME VALUE`\)\.For example:\n `/edit_repost_delay @fallen_shop 5`\tRrmove All Channels:\nTo remove all of the cahnnels use the command \(`/remove_all_channels`\)",parse_mode='MarkdownV2')
 
 def add_channels_command(update, context) -> str:
     if is_admin(update.message.chat.username):
@@ -346,9 +346,6 @@ def handle_message(update, context: CallbackContext):
         if is_admin(update.message.chat.username):
             message_type = update.message.chat.type
             text = str(update.message.text)
-            response = ''
-            with  open('karo.txt', 'w', encoding='utf-8') as file:
-                file.write(text)
             # Print a log for debugging
             # print(f'User ({update.message.chat.id}) says: "{text}" in: {message_type}')
 
@@ -368,7 +365,10 @@ def show_posts_command(update,context):
         posts_string = ''
         for i in range(len(posts)):
             posts_string += "#" + posts[i]['fid'] + "\n\n" + posts[i]["message"] + '\n➖➖➖➖➖' + "\n\n"
-        update.message.reply_text(posts_string)
+        if posts_string == '':
+            update.message.reply_text("No post added!")
+        else:    
+            update.message.reply_text(posts_string)
         update.message.reply_text('To remove a post use this command:\n`/remove_post ID` for example:\n`/remove_post \#123456`\n\n To remove all postss use this command:\n `/remove_all_posts`', parse_mode='MarkdownV2')
 
 def remove_posts_commad(update,context):
@@ -429,7 +429,7 @@ def error(update, context):
 
 # Run the program1
 if __name__ == '__main__':
-    updater = Updater("YUR BOT TOKEN")
+    updater = Updater("6639628878:AAFqR-an9Iif8iprVhGDHyLnCHUIxKbGM-s")
     dp = updater.dispatcher
     # Commands
     dp.add_handler(CommandHandler('start', start_command))
