@@ -104,6 +104,13 @@ def add_channels_command(update, context) -> str:
                     with open('posts.json', 'w') as file:
                         file.write(json.dumps(posts) + '\n')
                 update.message.reply_text("Cahnnel added!")
+                config = configparser.ConfigParser()
+                config.read("config.ini")
+                Reposting_status = config['Setting']['reposting_status']
+                # if Reposting_status == "True":
+                #     # f = open('Channels.json')
+                #     # channels_list = json.load(f)
+                #     # asyncio.timeout(main)
             else:
                 update.message.reply_text("Cahnnel already exists!")
         else:
@@ -185,39 +192,36 @@ async def send_message(channel,update):
     Repost_delay = channel["Repost_delay"]
     f = open('posts.json')
     data = json.load(f)
-    for j in range(999999):
-        # try:
-            config.read("config.ini")
-            Bot_Status = config['Setting']['bot_status']
-            if Bot_Status == "True":
-                for i in range(0, len(data)):
-                        config = configparser.ConfigParser()
-                        config.read("config.ini")
-                        Bot_Status = config['Setting']['bot_status']
-                        if Bot_Status != "True":
-                            print("Bot has been disabled")
-                            break
-                        if data[i]["message_id"][username] != '':
-                            try:
-                                bot.delete_message(chat_id=username, message_id=data[i]["message_id"][username])
-                            except:
-                                pass   
-                        # try:    
-                        message = bot.send_message(chat_id=username, text=f"<code>#{data[i]['fid']}</code>\n{data[i]['message']}",parse_mode='HTML')
-                        # except:
-                        #     print(error)
-                        #     pass
-                        with open('posts.json') as file:
-                            data = json.load(file)
-                            data[i]["message_id"][username] = str(message.message_id)
-                        with open('posts.json', 'w') as file:
-                            file.write(json.dumps(data))
+    config.read("config.ini")
+    Bot_Status = config['Setting']['bot_status']
+    if Bot_Status == "True":
+        for i in range(0, len(data)):
+                config = configparser.ConfigParser()
+                config.read("config.ini")
+                Bot_Status = config['Setting']['bot_status']
+                if Bot_Status != "True":
+                    print("Bot has been disabled")
+                    break
+                if data[i]["message_id"][username] != '':
+                    try:
+                        bot.delete_message(chat_id=username, message_id=data[i]["message_id"][username])
+                    except:
+                        pass   
+                # try:    
+                message = bot.send_message(chat_id=username, text=f"<code>#{data[i]['fid']}</code>\n{data[i]['message']}",parse_mode='HTML')
+                # except:
+                #     print(error)
+                #     pass
+                with open('posts.json') as file:
+                    data = json.load(file)
+                    data[i]["message_id"][username] = str(message.message_id)
+                with open('posts.json', 'w') as file:
+                    file.write(json.dumps(data))
 
-                        await asyncio.sleep(int(Interval)) 
-                await asyncio.sleep(60*int(Repost_delay))     
-            else:
-                update.message.reply_text('Bot Disabled')
-                break    
+                await asyncio.sleep(int(Interval)) 
+        await asyncio.sleep(10*int(Repost_delay))     
+    else:
+        update.message.reply_text('Bot Disabled')
         # except:
         #     pass          
            
@@ -237,13 +241,17 @@ def start_reposting_command(update, context):
         config = configparser.ConfigParser()
         config.read("config.ini")
         Bot_Status = config['Setting']['bot_status']
-        f = open('Channels.json')
-        channels_list = json.load(f)
-        if Bot_Status == "True":
-            update.message.reply_text('Reposting Started!')
-            asyncio.run(main(channels_list,update))   
-        else:
-            update.message.reply_text('Bot Disabled')
+        for j in range(999999):
+            f = open('Channels.json')
+            channels_list = json.load(f)
+            if Bot_Status == "True":
+                config.set("Setting", "reposting_status", "True")
+                with open("config.ini", "w") as configfile:
+                    config.write(configfile)
+                update.message.reply_text('Reposting Started!')
+                asyncio.run(main(channels_list,update))   
+            else:
+                update.message.reply_text('Bot Disabled')
                 
 def change_status_command(update,context):
     if is_admin(update.message.chat.username):
@@ -258,6 +266,7 @@ def change_status_command(update,context):
                             config.write(configfile)
                 elif status == str(0):
                     config.set("Setting", "bot_status", "False")
+                    config.set("Setting", "reposting_status", "False")
                     update.message.reply_text('Disabled!')
                     with open("config.ini", "w") as configfile:
                         config.write(configfile)
@@ -278,7 +287,7 @@ def handle_response(update, text) -> str:
         config.read("config.ini")
         Post_keyword = config['Setting']['post_keyword']
         last_id = int(config['Setting']['last_post_id'])
-        if Post_keyword.lower() in text or Post_keyword.upper() in text:
+        if Post_keyword.lower() in text.lower() or Post_keyword.upper() in text.upper():
             f = open('Channels.json')
             channels_list = json.load(f)
             a = {}
@@ -348,10 +357,23 @@ def remove_posts_commad(update,context):
             posts_id = args[0].split('#')[-1]
             f = open('posts.json')
             posts = json.load(f)
+            
             for i in range(len(posts)):
                 if posts_id == posts[i]['fid']:
+                    for j in range(len(posts[i]['message_id'])):
+                        print(list(posts[i]["message_id"].keys()))
+                        username = list(posts[i]["message_id"].keys())[j]
+                        if posts[i]["message_id"][username] != '':
+                            try:
+                                config = configparser.ConfigParser()
+                                config.read("config.ini")
+                                bot_token = config['Setting']['agent_bot_token']
+                                bot = Bot(token=bot_token)
+                                bot.delete_message(chat_id=username, message_id=posts[i]["message_id"][username])
+                            except:
+                                pass
                     posts.pop(i)
-                    update.message.reply_text('Posts deleted successfully')
+                    update.message.reply_text('Post deleted successfully')
                     break    
             with open('posts.json', 'w') as file:
                 file.write(json.dumps(posts) + '\n')      
