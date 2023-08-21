@@ -51,7 +51,7 @@ def start_command(update, context):
     if is_admin(update.message.chat.username):
         update.message.reply_text('/start\n Shows this message again\n➖➖➖➖➖\n/setting\nShows your current setting\n➖➖➖➖➖\n/channels\nShows list of your channels\n➖➖➖➖➖\n/admins\nList of your admins\n➖➖➖➖➖\n/statistics\nShows a summary about your posts\n➖➖➖➖➖\n/show_posts\nShows the posts that has been saved\n➖➖➖➖➖\n/start_rp\nStart Reposting')
 
-def show_setting_command(update, context):
+def show_setting_command(update, context):  
     if is_admin(update.message.chat.username):
         config = configparser.ConfigParser()
         config.read("config.ini")
@@ -62,8 +62,10 @@ def show_setting_command(update, context):
             Bot_Status = "Enabled"
         elif Bot_status == "False":
             Bot_Status = "Disabled"    
-        update.message.reply_text(f"Bot status: {Bot_status}\n✏️To Edit bot status, use this command:\n`/change_status NEW_VALUE`\(0 or 1\)\n For Example: \n   `/change_status 1`\n➖➖➖➖➖\npostKeyword \= {Post_keyword}\n✏️To Edit post keyword, use this command:\n`/edit_postkeyword NEW_VALUE`\n For Example: \n   `/edit_postkeyword playstaion`\n➖➖➖➖➖\nAgent bot token: {Agent_token}\n✏️To Edit agent bot token, use this command:\n`/edit_agentbottoken NEW_VALUE`\n For Example: \n   `/edit_agentbottoken ABADSADNAJSDN12491248FASF`", parse_mode='MarkdownV2')
-
+        update.message.reply_text(f"Bot status: \{Bot_status}\n✏️To Edit bot status, use this command:\n`/change\_status NEW_VALUE`\(0 or 1\)\n For Example: \n   `/change\_status 1`\n➖➖➖➖➖\npostKeyword \= \{Post_keyword}\n✏️To Edit post keyword, use this command:\n`/edit\_postkeyword NEW\_VALUE`\n For Example: \n   `/edit\_postkeyword playstaion`\n➖➖➖➖➖", parse_mode='MarkdownV2')
+        update.message.reply_text("Agent bot token: ")
+        update.message.reply_text(Agent_token)
+        update.message.reply_text("✏️To Edit agent bot token\, use this command:\n`/edit\_agentbottoken NEW\_VALUE`\n For Example: \n   `/edit\_agentbottoken asgsngnasnkasf`", parse_mode='MarkdownV2')
 def show_channels_command(update, context):
     if is_admin(update.message.chat.username):
         f = open('Channels.json')
@@ -173,100 +175,62 @@ def edit_agent_bot_token_command(update, context):
             print("No token provided")  
 
 async def send_message(channel,update):
-    try:
-        config = configparser.ConfigParser()
-        config.read("config.ini")
-        bot_token = config['Setting']['agent_bot_token']
-        bot = Bot(token=bot_token)
-        username = channel["username"]
-        Interval = channel["Interval"]
-        Repost_delay = channel["Repost_delay"]
-        f = open('posts.json')
-        data = json.load(f)
-        for j in range(999999):
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    bot_token = config['Setting']['agent_bot_token']
+    bot = Bot(token=bot_token)
+    username = channel["username"]
+    print(username)
+    Interval = channel["Interval"]
+    Repost_delay = channel["Repost_delay"]
+    f = open('posts.json')
+    data = json.load(f)
+    for j in range(999999):
+        # try:
             config.read("config.ini")
             Bot_Status = config['Setting']['bot_status']
             if Bot_Status == "True":
                 for i in range(0, len(data)):
-                    config = configparser.ConfigParser()
-                    config.read("config.ini")
-                    Bot_Status = config['Setting']['bot_status']
-                    if Bot_Status != "True":
-                        print("Bot has been disabled")
-                        break
-                    if data[i]["message_id"][username] != '':
-                        bot.delete_message(chat_id=username, message_id=data[i]["message_id"][username])
-                    message = bot.send_message(chat_id=username, text="#" + data[i]["fid"] + "\n" + data[i]["message"])
-                    with open('posts.json') as file:
-                        data = json.load(file)
-                        data[i]["message_id"][username] = str(message.message_id)
-                    with open('posts.json', 'w') as file:
-                        file.write(json.dumps(data))
+                        config = configparser.ConfigParser()
+                        config.read("config.ini")
+                        Bot_Status = config['Setting']['bot_status']
+                        if Bot_Status != "True":
+                            print("Bot has been disabled")
+                            break
+                        if data[i]["message_id"][username] != '':
+                            try:
+                                bot.delete_message(chat_id=username, message_id=data[i]["message_id"][username])
+                            except:
+                                pass   
+                        # try:    
+                        message = bot.send_message(chat_id=username, text=f"<code>#{data[i]['fid']}</code>\n{data[i]['message']}",parse_mode='HTML')
+                        # except:
+                        #     print(error)
+                        #     pass
+                        with open('posts.json') as file:
+                            data = json.load(file)
+                            data[i]["message_id"][username] = str(message.message_id)
+                        with open('posts.json', 'w') as file:
+                            file.write(json.dumps(data))
 
-                    await asyncio.sleep(int(Interval))   
+                        await asyncio.sleep(int(Interval)) 
                 await asyncio.sleep(60*int(Repost_delay))     
             else:
                 update.message.reply_text('Bot Disabled')
-                break
-    except:
-        config = configparser.ConfigParser()
-        config.read("config.ini")
-        bot_token = config['Setting']['agent_bot_token']
-        bot = Bot(token=bot_token)
-        username = channel["username"]
-        Interval = channel["Interval"]
-        Repost_delay = channel["Repost_delay"]
-        f = open('posts.json')
-        data = json.load(f)
-        for j in range(999999):
-            config.read("config.ini")
-            Bot_Status = config['Setting']['bot_status']
-            if Bot_Status == "True":
-                for i in range(0, len(data)):
-                    config = configparser.ConfigParser()
-                    config.read("config.ini")
-                    Bot_Status = config['Setting']['bot_status']
-                    if Bot_Status != "True":
-                        print("Bot has been disabled")
-                        break
-                    if data[i]["message_id"][username] != '':
-                        bot.delete_message(chat_id=username, message_id=data[i]["message_id"][username])
-                    message = bot.send_message(chat_id=username, text="#" + data[i]["fid"] + "\n" + data[i]["message"])
-                    with open('posts.json') as file:
-                        data = json.load(file)
-                        data[i]["message_id"][username] = str(message.message_id)
-                    with open('posts.json', 'w') as file:
-                        file.write(json.dumps(data))
-
-                    await asyncio.sleep(int(Interval))   
-                await asyncio.sleep(60*int(Repost_delay))     
-            else:
-                update.message.reply_text('Bot Disabled')
-                break        
+                break    
+        # except:
+        #     pass          
            
 async def send_messages_to_channels(channels,update):
-    try:
-        tasks = []
-        for channel in channels:
-            task = asyncio.create_task(send_message(channel,update))
-            tasks.append(task)
-            await asyncio.sleep(int(channel["Repost_delay"]))
-        await asyncio.gather(*tasks)
-    except:
-        tasks = []
-        for channel in channels:
-            task = asyncio.create_task(send_message(channel,update))
-            tasks.append(task)
-            await asyncio.sleep(int(channel["Repost_delay"]))
-        await asyncio.gather(*tasks)        
-
+    tasks = []
+    for channel in channels:
+        task = asyncio.create_task(send_message(channel,update))
+        tasks.append(task)
+        await asyncio.sleep(int(channel["Repost_delay"]))
     await asyncio.gather(*tasks)
 
 async def main(data,update):   
-    try:
-        await send_messages_to_channels(data,update)
-    except:
-         await send_messages_to_channels(data,update)   
+    await send_messages_to_channels(data,update)
 
 def start_reposting_command(update, context):
     if is_admin(update.message.chat.username):
@@ -277,10 +241,7 @@ def start_reposting_command(update, context):
         channels_list = json.load(f)
         if Bot_Status == "True":
             update.message.reply_text('Reposting Started!')
-            try:
-                asyncio.run(main(channels_list,update)) 
-            except:
-                asyncio.run(main(channels_list,update))   
+            asyncio.run(main(channels_list,update))   
         else:
             update.message.reply_text('Bot Disabled')
                 
@@ -316,7 +277,8 @@ def handle_response(update, text) -> str:
         config = configparser.ConfigParser()
         config.read("config.ini")
         Post_keyword = config['Setting']['post_keyword']
-        if Post_keyword in text:
+        last_id = int(config['Setting']['last_post_id'])
+        if Post_keyword.lower() in text or Post_keyword.upper() in text:
             f = open('Channels.json')
             channels_list = json.load(f)
             a = {}
@@ -328,11 +290,15 @@ def handle_response(update, text) -> str:
             Post_keyword = config['Setting']['post_keyword']
             f = open('posts.json')
             posts = json.load(f)
+            last_id += 1
             data = {
-                'fid': str(random.randint(0,999999)),
+                'fid': str(last_id),
                 'message': text,
                 'message_id' : a
             }
+            config.set("Setting", "last_post_id", str(last_id))
+            with open("config.ini", "w") as configfile:
+                config.write(configfile)
             posts.append(data)
             with open('posts.json', 'w') as file:
                 file.write(json.dumps(posts) + '\n')
@@ -358,18 +324,22 @@ def handle_message(update, context: CallbackContext):
             else:
                 handle_response(update,text)
 
-def show_posts_command(update,context):
+
+
+def show_posts_command(update, context):
     if is_admin(update.message.chat.username):
         f = open('posts.json')
         posts = json.load(f)
-        posts_string = ''
-        for i in range(len(posts)):
-            posts_string += "#" + posts[i]['fid'] + "\n\n" + posts[i]["message"] + '\n➖➖➖➖➖' + "\n\n"
-        if posts_string == '':
+        f.close()  # Don't forget to close the file after reading it
+        
+        if not posts:
             update.message.reply_text("No post added!")
-        else:    
-            update.message.reply_text(posts_string)
-        update.message.reply_text('To remove a post use this command:\n`/remove_post ID` for example:\n`/remove_post \#123456`\n\n To remove all postss use this command:\n `/remove_all_posts`', parse_mode='MarkdownV2')
+        else:
+            for post in posts:
+                update.message.reply_text(f"<code>#{post['fid']}</code>\n\n{post['message']}\n➖➖➖➖➖\n\n", parse_mode='HTML')
+
+        update.message.reply_text('To remove a post use this command:\n`/remove_post ID` for example:\n`/remove_post #123456`\n\nTo remove all posts use this command:\n`/remove_all_posts`', parse_mode='MarkdownV2')
+
 
 def remove_posts_commad(update,context):
     if is_admin(update.message.chat.username):
@@ -429,7 +399,7 @@ def error(update, context):
 
 # Run the program1
 if __name__ == '__main__':
-    updater = Updater("6639628878:AAFqR-an9Iif8iprVhGDHyLnCHUIxKbGM-s")
+    updater = Updater("6239735036:AAFrY2SmPsCrj389r1qYL2REvQIpSUC_dYc")
     dp = updater.dispatcher
     # Commands
     dp.add_handler(CommandHandler('start', start_command))
